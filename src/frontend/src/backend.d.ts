@@ -8,10 +8,21 @@ export interface None {
 }
 export type Option<T> = Some<T> | None;
 export interface backendInterface {
-    getCurrentLevel(): Promise<bigint>;
+    earnCard(cardId: string): Promise<void>;
+    getCardAlbum(): Promise<Array<string>>;
     getProgress(): Promise<{
-        bestMoves: Array<[bigint, bigint]>;
-        currentLevel: bigint;
+        bestTimes: Array<[bigint, bigint]>;
+        collectedCards: Array<string>;
+        inventory: {
+            matchMakers: bigint;
+            hammers: bigint;
+            timeFreezers: bigint;
+        };
+        winStreak: bigint;
+        firstUnbeatenLevel: bigint;
     }>;
-    saveProgress(level: bigint, moves: bigint): Promise<void>;
+    resetWinStreak(): Promise<void>;
+    saveProgress(level: bigint, seconds: bigint): Promise<void>;
+    updateInventory(timeFreezers: bigint, matchMakers: bigint, hammers: bigint): Promise<void>;
+    updateWinStreak(newStreak: bigint): Promise<void>;
 }

@@ -16,8 +16,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Figtree', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
-        display: ['Figtree', 'system-ui', 'sans-serif'],
+        sans: ["Figtree", "system-ui", "sans-serif"],
+        display: ["BricolageGrotesque", "Figtree", "system-ui", "sans-serif"],
       },
       colors: {
         border: "oklch(var(--border))",
@@ -70,19 +70,6 @@ export default {
           border: "oklch(var(--sidebar-border))",
           ring: "oklch(var(--sidebar-ring))",
         },
-        game: {
-          bg: "oklch(0.38 0.085 222)",
-          tube: "oklch(0.75 0.05 220 / 0.18)",
-          "tube-border": "oklch(0.82 0.06 215 / 0.55)",
-          "cta-green": "#2FBF6B",
-          "ball-red": "#E84B4B",
-          "ball-blue": "#2D7FF0",
-          "ball-green": "#3CCB63",
-          "ball-yellow": "#F6C21A",
-          "ball-orange": "#F28A1A",
-          "ball-purple": "#9B5DE5",
-          "ball-pink": "#F72585",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -91,9 +78,9 @@ export default {
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgba(0,0,0,0.05)",
-        tube: "inset 0 2px 8px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15)",
-        ball: "inset -3px -3px 8px rgba(0,0,0,0.3), inset 3px 3px 8px rgba(255,255,255,0.25)",
-        "game-card": "0 20px 60px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.2)",
+        card: "0 4px 12px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3)",
+        shelf: "inset 0 2px 8px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.2)",
+        glow: "0 0 20px oklch(0.78 0.18 75 / 0.35)",
       },
       keyframes: {
         "accordion-down": {

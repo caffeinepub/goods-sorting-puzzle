@@ -90,32 +90,64 @@ export class ExternalBlob {
     }
 }
 export interface backendInterface {
-    getCurrentLevel(): Promise<bigint>;
+    earnCard(cardId: string): Promise<void>;
+    getCardAlbum(): Promise<Array<string>>;
     getProgress(): Promise<{
-        bestMoves: Array<[bigint, bigint]>;
-        currentLevel: bigint;
+        bestTimes: Array<[bigint, bigint]>;
+        collectedCards: Array<string>;
+        inventory: {
+            matchMakers: bigint;
+            hammers: bigint;
+            timeFreezers: bigint;
+        };
+        winStreak: bigint;
+        firstUnbeatenLevel: bigint;
     }>;
-    saveProgress(level: bigint, moves: bigint): Promise<void>;
+    resetWinStreak(): Promise<void>;
+    saveProgress(level: bigint, seconds: bigint): Promise<void>;
+    updateInventory(timeFreezers: bigint, matchMakers: bigint, hammers: bigint): Promise<void>;
+    updateWinStreak(newStreak: bigint): Promise<void>;
 }
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
-    async getCurrentLevel(): Promise<bigint> {
+    async earnCard(arg0: string): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.getCurrentLevel();
+                const result = await this.actor.earnCard(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getCurrentLevel();
+            const result = await this.actor.earnCard(arg0);
+            return result;
+        }
+    }
+    async getCardAlbum(): Promise<Array<string>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCardAlbum();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCardAlbum();
             return result;
         }
     }
     async getProgress(): Promise<{
-        bestMoves: Array<[bigint, bigint]>;
-        currentLevel: bigint;
+        bestTimes: Array<[bigint, bigint]>;
+        collectedCards: Array<string>;
+        inventory: {
+            matchMakers: bigint;
+            hammers: bigint;
+            timeFreezers: bigint;
+        };
+        winStreak: bigint;
+        firstUnbeatenLevel: bigint;
     }> {
         if (this.processError) {
             try {
@@ -130,6 +162,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async resetWinStreak(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.resetWinStreak();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.resetWinStreak();
+            return result;
+        }
+    }
     async saveProgress(arg0: bigint, arg1: bigint): Promise<void> {
         if (this.processError) {
             try {
@@ -141,6 +187,34 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.saveProgress(arg0, arg1);
+            return result;
+        }
+    }
+    async updateInventory(arg0: bigint, arg1: bigint, arg2: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateInventory(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateInventory(arg0, arg1, arg2);
+            return result;
+        }
+    }
+    async updateWinStreak(arg0: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateWinStreak(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateWinStreak(arg0);
             return result;
         }
     }

@@ -1,77 +1,70 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Layers, List } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
-import GameBoard from "./components/GameBoard";
+import { useCallback, useState } from "react";
+import Album from "./components/Album";
 import HomeScreen from "./components/HomeScreen";
 import LevelSelect from "./components/LevelSelect";
-import { LEVELS } from "./game/levels";
-import { useGameProgress, useSaveProgress } from "./hooks/useQueries";
+import ShelfBoard from "./components/ShelfBoard";
+import { getLevel } from "./game/levels";
+import { useGameProgress } from "./hooks/useQueries";
 
 const queryClient = new QueryClient();
 
-type Screen = "home" | "select" | "game";
+type Screen = "home" | "levelSelect" | "game" | "album";
+
+interface Inventory {
+  timeFreezers: number;
+  matchMakers: number;
+  hammers: number;
+}
 
 function GameApp() {
   const [screen, setScreen] = useState<Screen>("home");
   const [currentLevelId, setCurrentLevelId] = useState(1);
-  const [localUnlocked, setLocalUnlocked] = useState(1);
-  const [localBestMoves, setLocalBestMoves] = useState<Map<number, number>>(
-    new Map(),
-  );
 
   const { data: progress } = useGameProgress();
-  const saveProgress = useSaveProgress();
 
-  useEffect(() => {
-    if (progress) {
-      setLocalUnlocked(progress.currentLevel);
-      setLocalBestMoves(progress.bestMoves);
-      setCurrentLevelId(Math.min(progress.currentLevel, LEVELS.length));
-    }
-  }, [progress]);
+  const firstUnbeatenLevel = progress?.firstUnbeatenLevel ?? 1;
+  const winStreak = progress?.winStreak ?? 0;
+  const inventory: Inventory = progress?.inventory ?? {
+    timeFreezers: 0,
+    matchMakers: 0,
+    hammers: 0,
+  };
+  const earnedCards = progress?.collectedCards ?? [];
+  const bestTimes = progress?.bestTimes ?? new Map<number, number>();
 
-  const currentLevel = LEVELS.find((l) => l.id === currentLevelId) ?? LEVELS[0];
-  const isLastLevel = currentLevelId === LEVELS.length;
+  const level = getLevel(currentLevelId);
 
-  const handleLevelComplete = useCallback(
-    (moves: number) => {
-      const existing = localBestMoves.get(currentLevelId);
-      if (!existing || moves < existing) {
-        setLocalBestMoves((prev) => {
-          const updated = new Map(prev);
-          updated.set(currentLevelId, moves);
-          return updated;
-        });
-      }
-      const nextLevel = currentLevelId + 1;
-      if (nextLevel > localUnlocked && nextLevel <= LEVELS.length) {
-        setLocalUnlocked(nextLevel);
-      }
-      saveProgress.mutate({ level: currentLevelId, moves });
-    },
-    [currentLevelId, localBestMoves, localUnlocked, saveProgress],
-  );
+  const handlePlay = useCallback(() => {
+    setCurrentLevelId(firstUnbeatenLevel > 0 ? firstUnbeatenLevel : 1);
+    setScreen("game");
+  }, [firstUnbeatenLevel]);
+
+  const handleSelectLevel = useCallback((id: number) => {
+    setCurrentLevelId(id);
+    setScreen("game");
+  }, []);
 
   const handleNextLevel = useCallback(() => {
-    if (!isLastLevel) {
-      setCurrentLevelId((id) => id + 1);
-    } else {
-      setScreen("select");
-    }
-  }, [isLastLevel]);
+    setCurrentLevelId((id) => id + 1);
+    setScreen("game");
+  }, []);
 
-  const handleReplay = useCallback(() => {
-    setCurrentLevelId((id) => id);
+  const handleWin = useCallback((_newStreak: number, _inv: Inventory) => {
+    // Progress updates handled inside ShelfBoard via mutations
+  }, []);
+
+  const handleLose = useCallback(() => {
+    // Streak reset handled inside ShelfBoard
   }, []);
 
   return (
     <div
-      className="min-h-screen font-sans"
       style={{
-        background:
-          "linear-gradient(160deg, oklch(0.38 0.085 222) 0%, oklch(0.28 0.075 235) 100%)",
         minHeight: "100dvh",
+        background:
+          "linear-gradient(160deg, oklch(0.14 0.04 265) 0%, oklch(0.11 0.03 280) 100%)",
       }}
     >
       <AnimatePresence mode="wait">
@@ -81,30 +74,30 @@ function GameApp() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.2 }}
           >
             <HomeScreen
-              onPlay={() => setScreen("game")}
-              onLevels={() => setScreen("select")}
+              onPlay={handlePlay}
+              onLevels={() => setScreen("levelSelect")}
+              onAlbum={() => setScreen("album")}
+              winStreak={winStreak}
+              collectedCards={earnedCards.length}
             />
           </motion.div>
         )}
 
-        {screen === "select" && (
+        {screen === "levelSelect" && (
           <motion.div
-            key="select"
+            key="levelSelect"
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.22 }}
           >
             <LevelSelect
-              unlockedUpTo={localUnlocked}
-              bestMoves={localBestMoves}
-              onSelectLevel={(id) => {
-                setCurrentLevelId(id);
-                setScreen("game");
-              }}
+              firstUnbeatenLevel={firstUnbeatenLevel}
+              bestTimes={bestTimes}
+              onSelectLevel={handleSelectLevel}
               onBack={() => setScreen("home")}
             />
           </motion.div>
@@ -112,92 +105,36 @@ function GameApp() {
 
         {screen === "game" && (
           <motion.div
-            key="game"
+            key={`game-${currentLevelId}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="min-h-screen flex flex-col"
+            transition={{ duration: 0.18 }}
           >
-            <header
-              className="flex items-center justify-between px-4 py-3"
-              style={{ borderBottom: "1px solid rgba(180,210,235,0.15)" }}
-              data-ocid="game.panel"
-            >
-              <button
-                type="button"
-                data-ocid="game.cancel_button"
-                onClick={() => setScreen("home")}
-                className="btn-hover p-2 rounded-full"
-                style={{
-                  background: "rgba(180,210,235,0.12)",
-                  border: "1.5px solid rgba(180,210,235,0.25)",
-                }}
-              >
-                <List size={18} color="#e0efff" />
-              </button>
+            <ShelfBoard
+              level={level}
+              winStreak={winStreak}
+              earnedCards={earnedCards}
+              initialInventory={inventory}
+              onGoHome={() => setScreen("home")}
+              onGoLevelSelect={() => setScreen("levelSelect")}
+              onGoAlbum={() => setScreen("album")}
+              onNextLevel={handleNextLevel}
+              onWin={handleWin}
+              onLose={handleLose}
+            />
+          </motion.div>
+        )}
 
-              <div className="flex flex-col items-center">
-                <span className="text-lg font-black text-white tracking-wide">
-                  Sort It!
-                </span>
-                <span
-                  className="text-xs font-medium"
-                  style={{ color: "rgba(180,210,235,0.65)" }}
-                >
-                  Level {currentLevelId} / {LEVELS.length}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                data-ocid="level_select.link"
-                onClick={() => setScreen("select")}
-                className="btn-hover p-2 rounded-full"
-                style={{
-                  background: "rgba(180,210,235,0.12)",
-                  border: "1.5px solid rgba(180,210,235,0.25)",
-                }}
-              >
-                <Layers size={18} color="#e0efff" />
-              </button>
-            </header>
-
-            <div className="text-center py-2 px-4">
-              <span
-                className="text-xs font-medium"
-                style={{ color: "rgba(180,210,235,0.55)" }}
-              >
-                {currentLevel.description}
-              </span>
-            </div>
-
-            <main
-              className="flex-1 flex items-start justify-center pt-4 pb-8 px-2"
-              data-ocid="game.section"
-            >
-              <GameBoard
-                key={currentLevelId}
-                level={currentLevel}
-                onLevelComplete={handleLevelComplete}
-                onNextLevel={handleNextLevel}
-                onReplay={handleReplay}
-                isLastLevel={isLastLevel}
-                bestMoves={localBestMoves.get(currentLevelId)}
-              />
-            </main>
-
-            <footer className="text-center py-3 px-4">
-              <a
-                href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(typeof window !== "undefined" ? window.location.hostname : "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs"
-                style={{ color: "rgba(180,210,235,0.35)" }}
-              >
-                © {new Date().getFullYear()} · Built with ❤️ using caffeine.ai
-              </a>
-            </footer>
+        {screen === "album" && (
+          <motion.div
+            key="album"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ duration: 0.22 }}
+          >
+            <Album earnedCards={earnedCards} onBack={() => setScreen("home")} />
           </motion.div>
         )}
       </AnimatePresence>

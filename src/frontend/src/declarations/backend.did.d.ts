@@ -11,12 +11,26 @@ import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
 export interface _SERVICE {
-  'getCurrentLevel' : ActorMethod<[], bigint>,
+  'earnCard' : ActorMethod<[string], undefined>,
+  'getCardAlbum' : ActorMethod<[], Array<string>>,
   'getProgress' : ActorMethod<
     [],
-    { 'bestMoves' : Array<[bigint, bigint]>, 'currentLevel' : bigint }
+    {
+      'bestTimes' : Array<[bigint, bigint]>,
+      'collectedCards' : Array<string>,
+      'inventory' : {
+        'matchMakers' : bigint,
+        'hammers' : bigint,
+        'timeFreezers' : bigint,
+      },
+      'winStreak' : bigint,
+      'firstUnbeatenLevel' : bigint,
+    }
   >,
+  'resetWinStreak' : ActorMethod<[], undefined>,
   'saveProgress' : ActorMethod<[bigint, bigint], undefined>,
+  'updateInventory' : ActorMethod<[bigint, bigint, bigint], undefined>,
+  'updateWinStreak' : ActorMethod<[bigint], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

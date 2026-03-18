@@ -9,36 +9,58 @@
 import { IDL } from '@icp-sdk/core/candid';
 
 export const idlService = IDL.Service({
-  'getCurrentLevel' : IDL.Func([], [IDL.Nat], ['query']),
+  'earnCard' : IDL.Func([IDL.Text], [], []),
+  'getCardAlbum' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
   'getProgress' : IDL.Func(
       [],
       [
         IDL.Record({
-          'bestMoves' : IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat)),
-          'currentLevel' : IDL.Nat,
+          'bestTimes' : IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat)),
+          'collectedCards' : IDL.Vec(IDL.Text),
+          'inventory' : IDL.Record({
+            'matchMakers' : IDL.Nat,
+            'hammers' : IDL.Nat,
+            'timeFreezers' : IDL.Nat,
+          }),
+          'winStreak' : IDL.Nat,
+          'firstUnbeatenLevel' : IDL.Nat,
         }),
       ],
       ['query'],
     ),
+  'resetWinStreak' : IDL.Func([], [], []),
   'saveProgress' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
+  'updateInventory' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [], []),
+  'updateWinStreak' : IDL.Func([IDL.Nat], [], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
   return IDL.Service({
-    'getCurrentLevel' : IDL.Func([], [IDL.Nat], ['query']),
+    'earnCard' : IDL.Func([IDL.Text], [], []),
+    'getCardAlbum' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
     'getProgress' : IDL.Func(
         [],
         [
           IDL.Record({
-            'bestMoves' : IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat)),
-            'currentLevel' : IDL.Nat,
+            'bestTimes' : IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat)),
+            'collectedCards' : IDL.Vec(IDL.Text),
+            'inventory' : IDL.Record({
+              'matchMakers' : IDL.Nat,
+              'hammers' : IDL.Nat,
+              'timeFreezers' : IDL.Nat,
+            }),
+            'winStreak' : IDL.Nat,
+            'firstUnbeatenLevel' : IDL.Nat,
           }),
         ],
         ['query'],
       ),
+    'resetWinStreak' : IDL.Func([], [], []),
     'saveProgress' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
+    'updateInventory' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Nat], [], []),
+    'updateWinStreak' : IDL.Func([IDL.Nat], [], []),
   });
 };
 

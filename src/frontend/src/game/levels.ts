@@ -1,180 +1,136 @@
-export type BallColor =
-  | "red"
-  | "blue"
-  | "green"
-  | "yellow"
-  | "orange"
-  | "purple"
-  | "pink";
+import { ALL_ITEM_TYPES } from "./items";
 
-export type Tube = BallColor[];
-
-export interface LevelData {
+export interface Level {
   id: number;
-  tubes: Tube[];
-  description: string;
+  difficulty: "easy" | "medium" | "hard";
+  shelves: string[][];
+  timeLimit: number;
+  numShelves: number;
+  isBoss?: boolean;
 }
 
-export const TUBE_CAPACITY = 4;
+const SHELF_CAPACITY = 3;
 
-export const BALL_COLORS: Record<BallColor, string> = {
-  red: "#E84B4B",
-  blue: "#2D7FF0",
-  green: "#3CCB63",
-  yellow: "#F6C21A",
-  orange: "#F28A1A",
-  purple: "#9B5DE5",
-  pink: "#F72585",
-};
+function seededRandom(seed: number): () => number {
+  let s = (seed ^ 0xdeadbeef) >>> 0;
+  return () => {
+    s ^= s << 13;
+    s ^= s >> 17;
+    s ^= s << 5;
+    return (s >>> 0) / 0x100000000;
+  };
+}
 
-export const BALL_SHADOW_COLORS: Record<BallColor, string> = {
-  red: "rgba(232,75,75,0.6)",
-  blue: "rgba(45,127,240,0.6)",
-  green: "rgba(60,203,99,0.6)",
-  yellow: "rgba(246,194,26,0.6)",
-  orange: "rgba(242,138,26,0.6)",
-  purple: "rgba(155,93,229,0.6)",
-  pink: "rgba(247,37,133,0.6)",
-};
+function seededShuffle<T>(arr: T[], rng: () => number): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const tmp = a[i];
+    a[i] = a[j];
+    a[j] = tmp;
+  }
+  return a;
+}
 
-export const LEVELS: LevelData[] = [
-  {
-    id: 1,
-    description: "2 colors · Easy warmup",
-    tubes: [["red", "red", "blue", "blue"], ["blue", "red", "red", "blue"], []],
-  },
-  {
-    id: 2,
-    description: "2 colors · Fully mixed",
-    tubes: [["blue", "red", "blue", "red"], ["red", "blue", "red", "blue"], []],
-  },
-  {
-    id: 3,
-    description: "3 colors · Getting tricky",
-    tubes: [
-      ["red", "green", "blue", "red"],
-      ["blue", "red", "green", "blue"],
-      ["green", "blue", "red", "green"],
-      [],
-    ],
-  },
-  {
-    id: 4,
-    description: "3 colors · Two empty tubes",
-    tubes: [
-      ["orange", "red", "green", "orange"],
-      ["green", "orange", "red", "green"],
-      ["red", "green", "orange", "red"],
-      [],
-      [],
-    ],
-  },
-  {
-    id: 5,
-    description: "4 colors · Mind the order",
-    tubes: [
-      ["yellow", "red", "green", "blue"],
-      ["blue", "yellow", "red", "green"],
-      ["green", "blue", "yellow", "red"],
-      ["red", "green", "blue", "yellow"],
-      [],
-      [],
-    ],
-  },
-  {
-    id: 6,
-    description: "4 colors · Cycle breaker",
-    tubes: [
-      ["red", "blue", "yellow", "green"],
-      ["green", "red", "blue", "yellow"],
-      ["yellow", "green", "red", "blue"],
-      ["blue", "yellow", "green", "red"],
-      [],
-      [],
-    ],
-  },
-  {
-    id: 7,
-    description: "5 colors · Rising challenge",
-    tubes: [
-      ["red", "blue", "green", "yellow"],
-      ["orange", "red", "blue", "green"],
-      ["yellow", "orange", "red", "blue"],
-      ["green", "yellow", "orange", "red"],
-      ["blue", "green", "yellow", "orange"],
-      [],
-      [],
-    ],
-  },
-  {
-    id: 8,
-    description: "5 colors · Deep shuffle",
-    tubes: [
-      ["orange", "green", "blue", "red"],
-      ["yellow", "orange", "green", "blue"],
-      ["red", "yellow", "orange", "green"],
-      ["blue", "red", "yellow", "orange"],
-      ["green", "blue", "red", "yellow"],
-      [],
-      [],
-    ],
-  },
-  {
-    id: 9,
-    description: "6 colors · Six-way tangle",
-    tubes: [
-      ["red", "blue", "green", "yellow"],
-      ["purple", "red", "blue", "green"],
-      ["orange", "purple", "red", "blue"],
-      ["green", "orange", "purple", "red"],
-      ["blue", "green", "orange", "purple"],
-      ["yellow", "blue", "green", "orange"],
-      [],
-      [],
-    ],
-  },
-  {
-    id: 10,
-    description: "6 colors · Master mix",
-    tubes: [
-      ["blue", "purple", "orange", "red"],
-      ["green", "blue", "purple", "orange"],
-      ["yellow", "green", "blue", "purple"],
-      ["red", "yellow", "green", "blue"],
-      ["orange", "red", "yellow", "green"],
-      ["purple", "orange", "red", "yellow"],
-      [],
-      [],
-    ],
-  },
-  {
-    id: 11,
-    description: "7 colors · Rainbow chaos",
-    tubes: [
-      ["red", "blue", "green", "yellow"],
-      ["purple", "orange", "pink", "red"],
-      ["blue", "green", "yellow", "purple"],
-      ["orange", "pink", "red", "blue"],
-      ["green", "yellow", "purple", "orange"],
-      ["pink", "red", "blue", "green"],
-      ["yellow", "purple", "orange", "pink"],
-      [],
-      [],
-    ],
-  },
-  {
-    id: 12,
-    description: "7 colors · Ultimate sort",
-    tubes: [
-      ["pink", "orange", "yellow", "red"],
-      ["blue", "pink", "orange", "yellow"],
-      ["green", "blue", "pink", "orange"],
-      ["purple", "green", "blue", "pink"],
-      ["red", "purple", "green", "blue"],
-      ["yellow", "red", "purple", "green"],
-      ["orange", "yellow", "red", "purple"],
-      [],
-      [],
-    ],
-  },
-];
+function distribute(
+  items: string[],
+  numShelves: number,
+  rng: () => number,
+): string[][] {
+  const shelves: string[][] = Array.from({ length: numShelves }, () => []);
+  for (const item of items) {
+    const candidates: number[] = [];
+    const fallbacks: number[] = [];
+    for (let i = 0; i < numShelves; i++) {
+      if (shelves[i].length >= SHELF_CAPACITY) continue;
+      const sameCount = shelves[i].filter((x) => x === item).length;
+      if (sameCount < 2) candidates.push(i);
+      else fallbacks.push(i);
+    }
+    const pool = candidates.length > 0 ? candidates : fallbacks;
+    if (pool.length === 0) continue;
+    const chosen = pool[Math.floor(rng() * pool.length)];
+    shelves[chosen].push(item);
+  }
+  return shelves;
+}
+
+function getDifficultyConfig(levelId: number): {
+  difficulty: "easy" | "medium" | "hard";
+  numShelves: number;
+  numTypes: number;
+  timeLimit: number;
+  isBoss: boolean;
+} {
+  if (levelId % 10 === 0) {
+    return {
+      difficulty: "hard",
+      numShelves: 10,
+      numTypes: 8,
+      timeLimit: 150,
+      isBoss: true,
+    };
+  }
+  if (levelId <= 10)
+    return {
+      difficulty: "easy",
+      numShelves: 5,
+      numTypes: 3,
+      timeLimit: 90,
+      isBoss: false,
+    };
+  if (levelId <= 25)
+    return {
+      difficulty: "easy",
+      numShelves: 6,
+      numTypes: 4,
+      timeLimit: 90,
+      isBoss: false,
+    };
+  if (levelId <= 50)
+    return {
+      difficulty: "medium",
+      numShelves: 7,
+      numTypes: 5,
+      timeLimit: 120,
+      isBoss: false,
+    };
+  if (levelId <= 75)
+    return {
+      difficulty: "medium",
+      numShelves: 8,
+      numTypes: 6,
+      timeLimit: 150,
+      isBoss: false,
+    };
+  return {
+    difficulty: "hard",
+    numShelves: 9,
+    numTypes: 7,
+    timeLimit: 240,
+    isBoss: false,
+  };
+}
+
+function buildLevel(levelId: number, seed: number): Level {
+  const { difficulty, numShelves, numTypes, timeLimit, isBoss } =
+    getDifficultyConfig(levelId);
+  const rng = seededRandom(seed);
+  const types = seededShuffle([...ALL_ITEM_TYPES], rng).slice(0, numTypes);
+  // Each type gets exactly 3 items (fills one shelf when matched)
+  const items = seededShuffle(
+    types.flatMap((t) => [t, t, t]),
+    rng,
+  );
+  const shelves = distribute(items, numShelves, rng);
+  return { id: levelId, difficulty, shelves, timeLimit, numShelves, isBoss };
+}
+
+export const LEVELS: Level[] = Array.from({ length: 100 }, (_, i) =>
+  buildLevel(i + 1, (i + 1) * 97531 + 12345),
+);
+
+export function getLevel(levelId: number): Level {
+  if (levelId >= 1 && levelId <= 100) return LEVELS[levelId - 1];
+  return buildLevel(levelId, levelId * 99991 + 7);
+}
