@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Figtree";
+  src: url("/assets/fonts/Figtree.woff2") format("woff2");
+  font-weight: 300 900;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --radius: 0.875rem;
+    --background: 0.38 0.075 222;
+    --foreground: 0.97 0.01 220;
+    --card: 0.32 0.065 225;
+    --card-foreground: 0.97 0.01 220;
+    --popover: 0.28 0.06 225;
+    --popover-foreground: 0.97 0.01 220;
+    --primary: 0.7 0.18 155;
+    --primary-foreground: 0.98 0 0;
+    --secondary: 0.44 0.085 220;
+    --secondary-foreground: 0.97 0.01 220;
+    --muted: 0.35 0.06 225;
+    --muted-foreground: 0.72 0.04 220;
+    --accent: 0.44 0.085 220;
+    --accent-foreground: 0.97 0.01 220;
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.985 0 0;
+    --border: 0.55 0.07 220;
+    --input: 0.5 0.07 220;
+    --ring: 0.7 0.18 155;
+    --chart-1: 0.646 0.222 41.116;
+    --chart-2: 0.6 0.118 184.704;
+    --chart-3: 0.398 0.07 227.392;
+    --chart-4: 0.828 0.189 84.429;
+    --chart-5: 0.769 0.188 70.08;
+    --sidebar: 0.32 0.065 225;
+    --sidebar-foreground: 0.97 0.01 220;
+    --sidebar-primary: 0.7 0.18 155;
+    --sidebar-primary-foreground: 0.98 0 0;
+    --sidebar-accent: 0.44 0.085 220;
+    --sidebar-accent-foreground: 0.97 0.01 220;
+    --sidebar-border: 0.55 0.07 220;
+    --sidebar-ring: 0.7 0.18 155;
+
+    /* Game ball colors */
+    --ball-red: #e84b4b;
+    --ball-blue: #2d7ff0;
+    --ball-green: #3ccb63;
+    --ball-yellow: #f6c21a;
+    --ball-orange: #f28a1a;
+    --ball-purple: #9b5de5;
+    --ball-pink: #f72585;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background: linear-gradient(
+      160deg,
+      oklch(0.38 0.085 222),
+      oklch(0.3 0.075 230)
+    );
+    min-height: 100vh;
+    font-family: "Figtree", "Plus Jakarta Sans", system-ui, sans-serif;
+  }
+}
+
+/* Game-specific animations */
+@keyframes ball-drop {
+  0% {
+    transform: translateY(-40px) scale(0.7);
+    opacity: 0.4;
+  }
+  60% {
+    transform: translateY(4px) scale(1.08);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-2px) scale(0.97);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes tube-complete {
+  0% {
+    box-shadow: 0 0 0 2px #3ccb63;
+  }
+  50% {
+    box-shadow: 0 0 18px 6px #3ccb63, 0 0 32px 10px rgba(60, 203, 99, 0.35);
+    transform: scale(1.04);
+  }
+  100% {
+    box-shadow: 0 0 8px 3px #3ccb63, 0 0 18px 6px rgba(60, 203, 99, 0.25);
+    transform: scale(1);
+  }
+}
+
+@keyframes tube-select-pulse {
+  0% {
+    box-shadow: 0 0 0 2px #f6c21a;
+  }
+  50% {
+    box-shadow: 0 0 12px 4px #f6c21a, 0 0 24px 8px rgba(246, 194, 26, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 2px #f6c21a;
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes level-complete-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes star-pop {
+  0% {
+    transform: scale(0) rotate(-30deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.3) rotate(10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.ball-animate-in {
+  animation: ball-drop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.tube-complete {
+  animation: tube-complete 0.6s ease-out forwards;
+}
+
+.tube-selected {
+  animation: tube-select-pulse 1.2s ease-in-out infinite;
+}
+
+.level-complete-card {
+  animation: level-complete-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.btn-hover {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-hover:hover {
+  transform: scale(1.05);
+}
+
+.btn-hover:active {
+  transform: scale(0.96);
+}
